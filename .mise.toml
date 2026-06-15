@@ -1,0 +1,7 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+[tools]
+go = "1.26"
+"go:github.com/golangci/golangci-lint/v2/cmd/golangci-lint" = "2"
+"go:github.com/goreleaser/goreleaser/v2" = "2"
+"go:github.com/go-task/task/v3/cmd/task" = "3"

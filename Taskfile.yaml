@@ -1,0 +1,104 @@
+# This is a Taskfile. See https://taskfile.dev
+# `brew install go-task` to install the task runner, or
+# `go install github.com/go-task/task/v3/cmd/task@latest`
+# `task --list` to list all tasks
+# `task <taskname>` to run a task
+
+version: '3'
+
+vars:
+  BINARY: sievemgmt
+  GIT_COMMIT:
+    sh: git rev-parse --verify HEAD 2>/dev/null || echo none
+  GIT_SHA:
+    sh: git rev-parse --short --verify HEAD 2>/dev/null || echo unknown
+  LDFLAGS: >-
+    -s -w
+    -X github.com/hilli/sievemgmt/cmd.Version=dev-{{.GIT_SHA}}
+    -X github.com/hilli/sievemgmt/cmd.GitCommit={{.GIT_COMMIT}}
+    -X github.com/hilli/sievemgmt/cmd.BuildDate={{now | date "2006-01-02T15:04:05Z07:00"}}
+
+tasks:
+  build:
+    desc: Build the binary
+    aliases: [b]
+    cmds:
+      - go build -ldflags='{{.LDFLAGS}}' -o bin/{{.BINARY}}{{exeExt}} .
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - bin/{{.BINARY}}
+
+  run:
+    desc: Build and run sievemgmt (pass args after --)
+    aliases: [r]
+    cmds:
+      - go run -ldflags='{{.LDFLAGS}}' . {{.CLI_ARGS}}
+
+  lint:
+    desc: Run golangci-lint
+    aliases: [l]
+    cmds:
+      - golangci-lint run ./...
+
+  lint:fix:
+    desc: Run golangci-lint with auto-fix
+    aliases: [lf]
+    cmds:
+      - golangci-lint run --fix ./...
+
+  test:
+    desc: Run unit tests
+    aliases: [t]
+    cmds:
+      - go test ./...
+
+  test:coverage:
+    desc: Run unit tests with coverage
+    aliases: [tc]
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+    generates:
+      - coverage.out
+      - coverage.html
+
+  test:integration:
+    desc: Run integration tests against a live server (requires SIEVE_TEST_SERVER and tmp/accounts)
+    aliases: [ti]
+    cmds:
+      - go test -tags integration -v ./...
+
+  check:
+    desc: Run all checks (lint + test)
+    aliases: [ck]
+    cmds:
+      - task: lint
+      - task: test
+
+  all:
+    desc: Run lint, build and test
+    aliases: [a]
+    cmds:
+      - task: lint
+      - task: build
+      - task: test
+
+  release:snapshot:
+    desc: Build a snapshot release with goreleaser
+    cmds:
+      - goreleaser release --snapshot --clean
+
+  tidy:
+    desc: Tidy Go modules
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Remove build artifacts
+    aliases: [x]
+    cmds:
+      - rm -rf bin dist completions
+      - rm -f coverage.out coverage.html

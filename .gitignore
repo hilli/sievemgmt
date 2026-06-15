@@ -1,0 +1,9 @@
+tmp
+sievemgmt
+bin/
+dist/
+completions/
+.task/
+coverage.out
+coverage.html
+*.test

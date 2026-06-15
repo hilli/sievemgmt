@@ -1,0 +1,64 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: vendor
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - errorlint
+    - gocritic
+    - gosec
+    - misspell
+    - nilerr
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
+  settings:
+    misspell:
+      locale: US
+    gosec:
+      # This is a CLI tool: reading user-specified files (config, scripts) and
+      # launching $EDITOR are intentional, so the taint-analysis rules are noise.
+      excludes:
+        - G204
+        - G304
+        - G702
+        - G703
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # Allow init functions in cmd packages (cobra command registration)
+      - path: cmd/
+        linters:
+          - gochecknoinits
+      # printer errors in cmd packages are non-critical
+      - path: cmd/
+        linters:
+          - gosec
+        text: "G104"
+      - path: _test\.go
+        linters:
+          - gosec
+          - dupl
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/hilli/sievemgmt
+
+output:
+  formats:
+    text:
+      path: stdout
+  show-stats: true

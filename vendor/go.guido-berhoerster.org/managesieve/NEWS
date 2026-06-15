@@ -1,0 +1,15 @@
+News
+====
+
+managesieve 0.8.1 (2021-02-03T13:21:32+01:00)
+---------------------------------------------
+- Fix SRV record lookup
+
+managesieve 0.8.0 (2020-12-23T18:41:35+01:00)
+---------------------------------------------
+- Remove reference to the sievemgr utility
+- Return warning messages from the CHECKSCRIPT and PUTSCRIPT commands
+- Add method to query the implementation string
+- Split off sievemgr command into separate repository
+- Add info subcommand for displaying some information about the server
+- Initial revision

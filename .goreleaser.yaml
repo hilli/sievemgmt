@@ -1,0 +1,141 @@
+# Make sure to check the documentation at https://goreleaser.com
+
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+# More examples at https://github.com/goreleaser/goreleaser/blob/main/.goreleaser.yaml
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - /bin/sh -c "set -e; mkdir -p completions; go run . completion bash > completions/sievemgmt.bash; go run . completion zsh > completions/sievemgmt.zsh; go run . completion fish > completions/sievemgmt.fish; go run . completion powershell > completions/sievemgmt.ps1"
+
+builds:
+  - id: sievemgmt
+    main: .
+    binary: sievemgmt
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - "7"
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/hilli/sievemgmt/cmd.Version={{ .Version }}
+      - -X github.com/hilli/sievemgmt/cmd.GitCommit={{ .Commit }}
+      - -X github.com/hilli/sievemgmt/cmd.BuildDate={{ .Date }}
+
+archives:
+  - formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+    files:
+      - README.md
+      - LICENSE
+      - completions/*
+
+homebrew_casks:
+  - name: sievemgmt
+    commit_author:
+      name: Jens Hilligsøe
+      email: jens@hilli.dk
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://github.com/hilli/sievemgmt"
+    description: "CLI to manage Sieve scripts on a remote ManageSieve server"
+    url:
+      verified: github.com/hilli/sievemgmt
+    completions:
+      bash: completions/sievemgmt.bash
+      zsh: completions/sievemgmt.zsh
+      fish: completions/sievemgmt.fish
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/sievemgmt"]
+          end
+    repository:
+      owner: hilli
+      name: homebrew-tap
+      branch: release-sievemgmt-{{.Tag}}
+      pull_request:
+        enabled: true
+        draft: false
+
+scoops:
+  - repository:
+      owner: hilli
+      name: scoop-bucket
+    homepage: https://github.com/hilli/sievemgmt
+    description: CLI to manage Sieve scripts on a remote ManageSieve server
+    directory: bucket
+    license: MIT
+
+nfpms:
+  - file_name_template: "{{ .ConventionalFileName }}"
+    id: packages
+    homepage: https://github.com/hilli/sievemgmt
+    description: |-
+      CLI to manage Sieve scripts on a remote ManageSieve server
+    maintainer: Jens Hilligsøe <jens@hilli.dk>
+    license: MIT
+    vendor: Jens Hilligsøe
+    bindir: /usr/bin
+    section: utils
+    contents:
+      - src: ./completions/sievemgmt.bash
+        dst: /usr/share/bash-completion/completions/sievemgmt
+        file_info:
+          mode: 0644
+      - src: ./completions/sievemgmt.fish
+        dst: /usr/share/fish/vendor_completions.d/sievemgmt.fish
+        file_info:
+          mode: 0644
+      - src: ./completions/sievemgmt.zsh
+        dst: /usr/share/zsh/vendor-completions/_sievemgmt
+        file_info:
+          mode: 0644
+      - src: ./LICENSE
+        dst: /usr/share/doc/sievemgmt/copyright
+        file_info:
+          mode: 0644
+    formats:
+      - apk
+      - deb
+      - rpm
+      - archlinux
+    deb:
+      lintian_overrides:
+        - statically-linked-binary
+        - changelog-file-missing-in-native-package
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
