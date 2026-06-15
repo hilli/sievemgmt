@@ -18,7 +18,7 @@ var editCmd = &cobra.Command{
 file, open it in $EDITOR, then check and upload it when the editor exits. If the
 server rejects the script you are asked whether to edit again or save a local
 copy instead.`,
-	Args: cobra.MaximumNArgs(1),
+	Args: maxArgs(1, "Pass at most one script name; omit it to edit the active script"),
 	RunE: func(_ *cobra.Command, args []string) error {
 		c, err := connect()
 		if err != nil {

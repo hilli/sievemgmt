@@ -14,7 +14,7 @@ var deleteYes bool
 var deleteCmd = &cobra.Command{
 	Use:   "delete <name>",
 	Short: "Delete a script from the server",
-	Args:  cobra.ExactArgs(1),
+	Args:  exactArgs(1, "Pass the script name to delete"),
 	RunE: func(_ *cobra.Command, args []string) error {
 		name := args[0]
 

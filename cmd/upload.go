@@ -17,7 +17,7 @@ var uploadCmd = &cobra.Command{
 	Long: `Upload a Sieve script from a local file. The script is checked by the
 server before being stored. If no name is given, the file's base name without
 the .sieve extension is used. Use --activate to make it the active script.`,
-	Args: cobra.RangeArgs(1, 2),
+	Args: rangeArgs(1, 2, "Pass the local .sieve file and optionally the server-side script name"),
 	RunE: func(_ *cobra.Command, args []string) error {
 		file := args[0]
 		data, err := os.ReadFile(file)

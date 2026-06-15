@@ -60,6 +60,7 @@ secondary:
 	override := writeFile(t, dir, "override.yaml", `
 primary:
   password: newpw
+  imap_server: imap.example.com:993
 third:
   email: third@example.com
   password: thirdpw
@@ -80,6 +81,9 @@ third:
 	}
 	if primary.Email != "old@example.com" {
 		t.Errorf("unrelated field changed: %q", primary.Email)
+	}
+	if primary.IMAPServer != "imap.example.com:993" {
+		t.Errorf("imap server not overridden: %q", primary.IMAPServer)
 	}
 
 	accts := cfg.Accounts()

@@ -10,7 +10,7 @@ import (
 var checkCmd = &cobra.Command{
 	Use:   "check <file>",
 	Short: "Check the validity of a local script against the server",
-	Args:  cobra.ExactArgs(1),
+	Args:  exactArgs(1, "Pass the local .sieve file to validate"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		file := args[0]
 		data, err := os.ReadFile(file)

@@ -9,7 +9,7 @@ import (
 var renameCmd = &cobra.Command{
 	Use:   "rename <old> <new>",
 	Short: "Rename a script on the server",
-	Args:  cobra.ExactArgs(2),
+	Args:  exactArgs(2, "Pass the current script name and the new script name"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		oldName, newName := args[0], args[1]
 

@@ -14,7 +14,7 @@ var downloadCmd = &cobra.Command{
 	Short: "Download a script (defaults to the active script)",
 	Long: `Download a script from the server. If no name is given, the currently
 active script is downloaded. Use -o to write to a file ("-" means stdout).`,
-	Args: cobra.MaximumNArgs(1),
+	Args: maxArgs(1, "Pass at most one script name; omit it to download the active script"),
 	RunE: func(_ *cobra.Command, args []string) error {
 		c, err := connect()
 		if err != nil {

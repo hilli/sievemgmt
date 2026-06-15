@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hilli/sievemgmt/internal/config"
+	"github.com/hilli/sievemgmt/internal/imap"
 	"github.com/hilli/sievemgmt/internal/sieve"
 )
 
@@ -44,6 +45,9 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&accountFlag, "account", "a", "",
 		"account to use (overrides "+config.EnvAccount+"; defaults to the first configured account)")
+	if err := rootCmd.RegisterFlagCompletionFunc("account", completeAccounts); err != nil {
+		panic(err)
+	}
 	rootCmd.SetVersionTemplate(
 		"sievemgmt {{.Version}} (commit " + GitCommit + ", built " + BuildDate + ")\n")
 }
@@ -77,4 +81,14 @@ func connect() (*sieve.Client, error) {
 		return nil, err
 	}
 	return sieve.Connect(acct)
+}
+
+// connectIMAP resolves the active account and opens an authenticated IMAPS
+// connection for IMAP METADATA commands.
+func connectIMAP() (*imap.Client, error) {
+	acct, err := resolveAccount()
+	if err != nil {
+		return nil, err
+	}
+	return imap.Connect(acct)
 }

@@ -19,6 +19,9 @@ type Account struct {
 	Password string `yaml:"password"`
 	// Server is the host, optionally with a ":port" suffix.
 	Server string `yaml:"server"`
+	// IMAPServer is the IMAP TLS host, optionally with a ":port" suffix. If
+	// empty, the host from Server is used with port 993.
+	IMAPServer string `yaml:"imap_server"`
 }
 
 // Config holds all configured accounts in the order they were first seen.
@@ -137,6 +140,9 @@ func mergeAccount(base, override Account) Account {
 	}
 	if override.Server != "" {
 		base.Server = override.Server
+	}
+	if override.IMAPServer != "" {
+		base.IMAPServer = override.IMAPServer
 	}
 	return base
 }

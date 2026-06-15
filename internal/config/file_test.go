@@ -22,7 +22,7 @@ func TestFileAddListRemoveRoundTrip(t *testing.T) {
 	if err := f.Set(Account{Name: "primary", Email: "p@example.com", Password: "pw", Server: "mail.example.com"}); err != nil {
 		t.Fatalf("Set: %v", err)
 	}
-	if err := f.Set(Account{Name: "work", Email: "w@example.com", Password: "wpw", Server: "mail.example.com:4190"}); err != nil {
+	if err := f.Set(Account{Name: "work", Email: "w@example.com", Password: "wpw", Server: "mail.example.com:4190", IMAPServer: "imap.example.com:993"}); err != nil {
 		t.Fatalf("Set: %v", err)
 	}
 	if err := f.Save(); err != nil {
@@ -43,6 +43,9 @@ func TestFileAddListRemoveRoundTrip(t *testing.T) {
 	}
 	if accts[1].Server != "mail.example.com:4190" {
 		t.Errorf("work server = %q", accts[1].Server)
+	}
+	if accts[1].IMAPServer != "imap.example.com:993" {
+		t.Errorf("work imap server = %q", accts[1].IMAPServer)
 	}
 
 	// File permissions must be owner-only.

@@ -21,13 +21,13 @@ var accountsCmd = &cobra.Command{
 		defaultName := cfg.Default().Name
 
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "\tNAME\tEMAIL\tSERVER")
+		fmt.Fprintln(w, "\tNAME\tEMAIL\tSERVER\tIMAP_SERVER")
 		for _, a := range cfg.Accounts() {
 			marker := " "
 			if (selected == "" && a.Name == defaultName) || a.Name == selected {
 				marker = "*"
 			}
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", marker, a.Name, a.Email, a.Server)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", marker, a.Name, a.Email, a.Server, a.IMAPServer)
 		}
 		return w.Flush()
 	},

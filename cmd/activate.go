@@ -11,7 +11,15 @@ var activateNone bool
 var activateCmd = &cobra.Command{
 	Use:   "activate [name]",
 	Short: "Set the active script (or deactivate all with --none)",
-	Args:  cobra.MaximumNArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) > 1 {
+			return usageError(cmd, "Pass one script name to activate, or use --none to deactivate all scripts")
+		}
+		if activateNone && len(args) > 0 {
+			return usageError(cmd, "Use either --none or a script name, not both")
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := ""
 		if len(args) == 1 {

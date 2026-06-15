@@ -18,6 +18,7 @@ var (
 	addEmail    string
 	addPassword string
 	addServer   string
+	addIMAP     string
 	addForce    bool
 )
 
@@ -65,9 +66,9 @@ var accountListCmd = &cobra.Command{
 			return nil
 		}
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "NAME\tEMAIL\tSERVER")
+		fmt.Fprintln(w, "NAME\tEMAIL\tSERVER\tIMAP_SERVER")
 		for _, a := range accts {
-			fmt.Fprintf(w, "%s\t%s\t%s\n", a.Name, a.Email, a.Server)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", a.Name, a.Email, a.Server, a.IMAPServer)
 		}
 		return w.Flush()
 	},
@@ -76,7 +77,7 @@ var accountListCmd = &cobra.Command{
 var accountAddCmd = &cobra.Command{
 	Use:   "add <name>",
 	Short: "Add (or update) an account in the config file",
-	Args:  cobra.ExactArgs(1),
+	Args:  exactArgs(1, "Pass the account name to add or update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 
@@ -89,10 +90,10 @@ var accountAddCmd = &cobra.Command{
 		}
 
 		if addEmail == "" {
-			return fmt.Errorf("--email is required")
+			return usageError(cmd, "--email is required, e.g. --email you@example.com")
 		}
 		if addServer == "" {
-			return fmt.Errorf("--server is required")
+			return usageError(cmd, `--server is required, e.g. --server mail.example.com or --server mail.example.com:4190`)
 		}
 
 		password := addPassword
@@ -104,10 +105,11 @@ var accountAddCmd = &cobra.Command{
 		}
 
 		if err := f.Set(config.Account{
-			Name:     name,
-			Email:    addEmail,
-			Password: password,
-			Server:   addServer,
+			Name:       name,
+			Email:      addEmail,
+			Password:   password,
+			Server:     addServer,
+			IMAPServer: addIMAP,
 		}); err != nil {
 			return err
 		}
@@ -123,7 +125,7 @@ var accountRemoveCmd = &cobra.Command{
 	Use:     "remove <name>",
 	Aliases: []string{"rm"},
 	Short:   "Remove an account from the config file",
-	Args:    cobra.ExactArgs(1),
+	Args:    exactArgs(1, "Pass the account name to remove"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 
@@ -181,6 +183,8 @@ func init() {
 	accountAddCmd.Flags().StringVar(&addEmail, "email", "", "account email/username (required)")
 	accountAddCmd.Flags().StringVar(&addPassword, "password", "", "account password (prompted if omitted)")
 	accountAddCmd.Flags().StringVar(&addServer, "server", "", `server host, optional ":port" (required)`)
+	accountAddCmd.Flags().StringVar(&addIMAP, "imap-server", "",
+		`IMAPS host, optional ":port" (defaults to --server host with port 993)`)
 	accountAddCmd.Flags().BoolVar(&addForce, "force", false, "overwrite an existing account")
 
 	accountCmd.AddCommand(accountListCmd, accountAddCmd, accountRemoveCmd)

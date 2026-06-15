@@ -31,10 +31,12 @@ primary:
   email: you@example.com
   password: your-password
   server: mail.example.com     # optional ":port"; default is 4190 (with SRV lookup)
+  imap_server: mail.example.com # optional ":port"; default is server host with port 993
 work:
   email: you@work.example.com
   password: your-work-password
   server: mail.work.example.com:4190
+  imap_server: imap.work.example.com:993
 ```
 
 > **Security:** the config holds plaintext passwords. Restrict its permissions:
@@ -67,6 +69,11 @@ SIEVEMGMT_ACCOUNT=work sievemgmt list
 | `rename <old> <new>`          | Rename a script.                                         |
 | `delete <name> [-y]`          | Delete a script (prompts unless `-y`).                   |
 | `check <file>`                | Validate a local script against the server.              |
+| `folders list [--all]`        | List IMAPSIEVE script associations for mailboxes.        |
+| `folders server-list`         | List IMAP mailbox names available for associations.      |
+| `folders set <mailbox> <script>` | Associate a mailbox with an uploaded script.          |
+| `folders set --global <script>` | Set the server-level IMAPSIEVE fallback script.        |
+| `folders unset <mailbox>` / `--global` | Remove an IMAPSIEVE association.              |
 
 ### The `edit` workflow
 
@@ -101,6 +108,40 @@ sievemgmt account add primary --force --email you@example.com --server mail.exam
 # Remove an account (alias: rm)
 sievemgmt account remove primary
 ```
+
+### Managing IMAPSIEVE folder associations
+
+IMAPSIEVE scripts are uploaded with ManageSieve like regular scripts, but they
+are attached to mailboxes with IMAP METADATA. The metadata entry is
+`/shared/imapsieve/script`, and its value is the uploaded script name. The script
+does not need to be active with `activate`.
+
+```sh
+# Upload a script without activating it for delivery-time Sieve.
+sievemgmt upload imap-events.sieve imap-events
+
+# Run that script for messages appended, copied, or flag-changed in Projects/Foo.
+sievemgmt folders set Projects/Foo imap-events
+
+# Example: keep messages in a folder unread.
+sievemgmt upload examples/mark-unseen-imapsieve.sieve mark-unseen
+sievemgmt folders set TODO mark-unseen
+
+# Show configured associations. Add --all to include mailboxes without one.
+sievemgmt folders list
+sievemgmt folders list --all
+
+# List mailbox names that can be used with folders set.
+sievemgmt folders server-list
+
+# Set or remove a server-level fallback used by mailboxes without their own entry.
+sievemgmt folders set --global imap-events
+sievemgmt folders unset --global
+```
+
+Shell completion suggests configured account names for `--account`, mailbox
+names for the first `folders set` argument, and uploaded script names for the
+second argument (or the first argument when using `folders set --global`).
 
 ## Testing
 
