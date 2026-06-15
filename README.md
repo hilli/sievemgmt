@@ -8,6 +8,14 @@ and an `edit` workflow that opens your `$EDITOR`, validates on save, and uploads
 
 ## Install
 
+With Homebrew:
+
+```sh
+brew install hilli/tap/sievemgmt
+```
+
+With Go:
+
 ```sh
 go install github.com/hilli/sievemgmt@latest
 ```
