@@ -7,3 +7,4 @@ completions/
 coverage.out
 coverage.html
 *.test
+.worktrees/
