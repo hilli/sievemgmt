@@ -1,0 +1,5 @@
+mox:
+  email: mox@localhost
+  password: moxmoxmox
+  server: localhost:5190
+  imap_server: localhost:1993

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hilli/sievemgmt/internal/config"
+	"github.com/hilli/sievemgmt/internal/tlsconfig"
 )
 
 // IMAPSieveScriptEntry is the RFC 6785 IMAP METADATA entry that selects the
@@ -67,7 +68,11 @@ func Connect(acct config.Account) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: DialTimeout}, "tcp", hostport, &tls.Config{ServerName: host})
+	tlsConfig, err := tlsconfig.Client(host)
+	if err != nil {
+		return nil, fmt.Errorf("configuring IMAP TLS with %s: %w", host, err)
+	}
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: DialTimeout}, "tcp", hostport, tlsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("connecting to IMAP %s: %w", hostport, err)
 	}

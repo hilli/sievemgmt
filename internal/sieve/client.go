@@ -2,7 +2,6 @@
 package sieve
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"go.guido-berhoerster.org/managesieve"
 
 	"github.com/hilli/sievemgmt/internal/config"
+	"github.com/hilli/sievemgmt/internal/tlsconfig"
 )
 
 // DefaultPort is the standard ManageSieve port (RFC 5804).
@@ -64,7 +64,12 @@ func Connect(acct config.Account) (*Client, error) {
 		return nil, fmt.Errorf("initializing ManageSieve session with %s: %w", host, err)
 	}
 
-	if err := c.StartTLS(&tls.Config{ServerName: host}); err != nil {
+	tlsConfig, err := tlsconfig.Client(host)
+	if err != nil {
+		_ = c.Close()
+		return nil, fmt.Errorf("configuring TLS with %s: %w", host, err)
+	}
+	if err := c.StartTLS(tlsConfig); err != nil {
 		_ = c.Close()
 		return nil, fmt.Errorf("starting TLS with %s: %w", host, err)
 	}

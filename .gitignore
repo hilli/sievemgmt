@@ -8,3 +8,4 @@ coverage.out
 coverage.html
 *.test
 .worktrees/
+examples_mox/mox-localserve/

@@ -49,6 +49,9 @@ work:
 
 > **Security:** the config holds plaintext passwords. Restrict its permissions:
 > `chmod 600 ~/.config/sievemgmt/sievemgmt.yaml`
+>
+> For local test servers with a private CA, set `SIEVEMGMT_TLS_CA_FILE` to a PEM
+> CA bundle before running commands.
 
 ### Selecting an account
 
@@ -150,6 +153,18 @@ sievemgmt folders unset --global
 Shell completion suggests configured account names for `--account`, mailbox
 names for the first `folders set` argument, and uploaded script names for the
 second argument (or the first argument when using `folders set --global`).
+
+## Local mox example
+
+Run the mox localserve example to start a local mox server, upload sample Sieve
+scripts, send demo messages, and print where to inspect the result:
+
+```sh
+examples_mox/setup.sh
+```
+
+The script uses a sibling mox checkout at `../mox` by default. Set
+`MOX_DIR=/path/to/mox` to use another checkout.
 
 ## Testing
 
